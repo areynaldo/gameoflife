@@ -1,2 +1,2 @@
-# gameoglife
+# gameoflife
 Conoway's game of life implementation in pygame.
