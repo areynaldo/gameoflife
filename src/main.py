@@ -61,40 +61,53 @@ def countNeighbours(cells, x, y):
 
 #Table class
 class Cgol():
-    pause = True
-    cells = []
+    screen = 0
+    pause = 0
+    changing = 0
+    cells = 0
     dt    = 0
+    lastcell = 0
 
-    def __init__(self, w, h):
+    def __init__(self, w, h, screen):
         self.pause = True
+        self.changing = False
+        self.screen = screen
         self.dt = 0
         self.cells = []
+        self.lastcell = (-1,-1)
         for i in range(0, h):
             self.cells.append([])
             for j in range(0, w):
                 self.cells[i].append(False)
 
-    def draw(self, screen):
-        h = screen.get_height()/len(self.cells)
-        w = screen.get_width()/len(self.cells[0])
+    def draw(self):
+        h = self.screen.get_height()/len(self.cells)
+        w = self.screen.get_width()/len(self.cells[0])
         for y in range(0, len(self.cells)):
             for x in range(0, len(self.cells[y])):
                 if self.cells[y][x]:
-                    pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(w*x, h*y, w, h))
+                    pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(w*x, h*y, w, h))
                 elif not self.cells[y][x]:
-                    pygame.draw.rect(screen, (255,255,255), pygame.Rect(w*x, h*y, w, h))
-                pygame.draw.rect(screen, (200,200,200), pygame.Rect(w*x, h*y, w, h), 1)
+                    pygame.draw.rect(self.screen, (255,255,255), pygame.Rect(w*x, h*y, w, h))
+                pygame.draw.rect(self.screen, (200,200,200), pygame.Rect(w*x, h*y, w, h), 1)
 
-    def changeCells(self, screen):
-        h = screen.get_height()/len(self.cells)
-        w = screen.get_width()/len(self.cells[0])
+    def changeCells(self):
+        h = self.screen.get_height()/len(self.cells)
+        w = self.screen.get_width()/len(self.cells[0])
         for y in range(0, len(self.cells)):
             for x in range(0, len(self.cells[y])):
-                rect = pygame.Rect(w*x, h*y, w, h)
-                if rect.collidepoint(pygame.mouse.get_pos()):
-                    self.cells[y][x] = False if self.cells[y][x] else True
+                if self.lastcell != (x,y):
+                    rect = pygame.Rect(w*x, h*y, w, h)
+                    if rect.collidepoint(pygame.mouse.get_pos()):
+                        self.cells[y][x] = False if self.cells[y][x] else True
+                        self.lastcell = (x,y)
 
     def update(self, clock):
+        if self.changing:
+            self.changeCells()
+        else:
+            self.lastcell = (-1, -1)
+
         if not self.pause:
             self.dt += clock.get_time()
             print(self.dt)
@@ -113,33 +126,41 @@ class Cgol():
                 elif not oldcells[y][x]:
                     if neighbours == 3:
                         self.cells[y][x] = True
+                    
+    def addCells(self):
+        pass
 
 
 def main():
-    gol = Cgol(32,18)
 
     pygame.init()
-    gscreen = pygame.display.set_mode((1280, 720))
+    destSurface = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
+    srcSurface = destSurface.copy()
     grunning = True
     clock = pygame.time.Clock()
+    gol = Cgol(48,27, srcSurface)
 
     while grunning:
         clock.tick(60)
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                     grunning = False
+            #Mouse
             if ev.type == pygame.MOUSEBUTTONDOWN:
-                gol.changeCells(gscreen)
+                if ev.button == 1:
+                    gol.changing = True
+            if ev.type == pygame.MOUSEBUTTONUP:
+                if ev.button == 1:
+                    gol.changing = False;
+            #Keyboard
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_SPACE:
                     gol.pause = False if gol.pause else True
                 if ev.key == pygame.K_RIGHT:
                     gol.nextGen()
-                if ev.key == pygame.K_RIGHT:
-                    pass
-
         gol.update(clock)
-        gol.draw(gscreen)
+        gol.draw()
+        destSurface.blit(srcSurface, (0,0))
         pygame.display.flip()
 
 if __name__ == "__main__":
