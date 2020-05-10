@@ -8,3 +8,4 @@ I just wanted to have some kind of first-contact with Pygame to check if it coul
 * Press ``UP`` to zoom out / to add cells to the simulation.
 * Press ``DOWN`` to zoom in / to remove cells to the simulation.
 
+![demogif](https://i.imgur.com/HYxM8iQ.gif)
