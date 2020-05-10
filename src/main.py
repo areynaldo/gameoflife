@@ -93,7 +93,6 @@ class Cgol():
 
         if not self.pause:
             self.dt += clock.get_time()
-            print(self.dt)
             if self.dt >= 100:
                 self.dt = 0
                 self.nextGen()
